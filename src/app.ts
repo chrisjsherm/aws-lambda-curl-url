@@ -1,3 +1,4 @@
+import { APIGatewayEvent } from 'aws-lambda';
 import { default as axios } from 'axios';
 
 function call(url: string) {
@@ -28,11 +29,14 @@ function call(url: string) {
 const urlRegex =
   /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/i;
 
-export const handler = (event: { url: string }) => {
-  console.log(JSON.stringify(event));
-  console.log(`Event URL: ${event.url}`);
+export const handler = (event: APIGatewayEvent) => {
+  const body = JSON.parse(event.body!);
 
-  if (!event.url || typeof event.url !== 'string') {
+  console.log(body);
+  console.log(`URL: ${body.url}`);
+  console.log(`Type: ${typeof body.url}`);
+
+  if (!body.url || typeof body.url !== 'string') {
     let response = {
       statusCode: 400,
       headers: {
@@ -41,7 +45,7 @@ export const handler = (event: { url: string }) => {
       body: 'Please provide a URL property with a string value in the request body',
     };
     return Promise.resolve(response);
-  } else if (urlRegex.test(event.url) === false) {
+  } else if (urlRegex.test(body.url) === false) {
     let response = {
       statusCode: 400,
       headers: {
@@ -51,7 +55,7 @@ export const handler = (event: { url: string }) => {
     };
     return Promise.resolve(response);
   } else {
-    const url = event.url;
+    const url = body.url;
     return call(url);
   }
 };
