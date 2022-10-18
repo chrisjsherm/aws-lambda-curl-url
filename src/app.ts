@@ -29,6 +29,7 @@ const urlRegex =
   /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/i;
 
 export const handler = (event: { url: string }) => {
+  console.log(JSON.stringify(event));
   console.log(`Event URL: ${event.url}`);
 
   if (!event.url || typeof event.url !== 'string') {
