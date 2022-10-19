@@ -1,1 +1,1 @@
-docker build -t hello-world:latest . --progress=tty
+docker build -t hello-world:latest ../ --progress=tty
