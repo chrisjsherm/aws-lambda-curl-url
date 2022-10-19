@@ -1,61 +1,113 @@
-import { APIGatewayEvent } from 'aws-lambda';
+import { APIGatewayEvent, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { default as axios } from 'axios';
+import { urlRegex } from './constants/url.regex';
+import { AppRequestBody } from './models/app-request-body.interface';
 
+/**
+ * cURL the URL and return the result
+ *
+ * @param url URL to cURL
+ * @returns Result of cURL
+ */
 function call(url: string) {
-  console.log('Getting:' + url);
+  console.log(`cURLing: ${url}.`);
+
   return axios
     .get(url)
     .then((response: { data: string }) => {
-      console.log('Got content for:' + url);
+      console.log('Received content.');
+
       return {
         statusCode: 200,
         headers: {
-          'content-type': 'text/plain; charset=utf-8',
+          'content-type': 'text/html; charset=utf-8',
         },
         body: JSON.stringify(response.data),
       };
     })
     .catch((error: Error) => {
+      console.log('Error fetching content:');
+      console.log(error);
+
       return {
         statusCode: 500,
         headers: {
           'content-type': 'text/plain; charset=utf-8',
         },
-        body: 'Some error fetching the content\n' + error.message,
+        body: 'An error occurred fetching the content:\n' + error.message,
       };
     });
 }
 
-const urlRegex =
-  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/i;
+/**
+ * Parse request body, ensuring it is well-formed
+ *
+ * @param body Request body
+ * @returns Parsed request body
+ */
+function parseRequestBody(body: string | null): AppRequestBody {
+  const badRequest = {
+    statusCode: 400,
+    headers: {
+      'content-type': 'text/plain; charset=utf-8',
+    },
+  };
 
-export const handler = (event: APIGatewayEvent) => {
-  const body = JSON.parse(event.body!);
+  if (body === undefined || body === null) {
+    throw new Error(
+      JSON.stringify({
+        ...badRequest,
+        body: 'Request body is missing.',
+      }),
+    );
+  }
 
-  console.log(body);
-  console.log(`URL: ${body.url}`);
-  console.log(`Type: ${typeof body.url}`);
+  const jsonBody = JSON.parse(body) as AppRequestBody;
 
-  if (!body.url || typeof body.url !== 'string') {
-    let response = {
-      statusCode: 400,
-      headers: {
-        'content-type': 'text/plain; charset=utf-8',
-      },
-      body: 'Please provide a URL property with a string value in the request body',
-    };
-    return Promise.resolve(response);
-  } else if (urlRegex.test(body.url) === false) {
-    let response = {
-      statusCode: 400,
-      headers: {
-        'content-type': 'text/plain; charset=utf-8',
-      },
-      body: 'Please provide a valid URL',
-    };
-    return Promise.resolve(response);
-  } else {
-    const url = body.url;
-    return call(url);
+  if (jsonBody.url === undefined) {
+    throw new Error(
+      JSON.stringify({
+        ...badRequest,
+        body: 'Property "url" is missing from the request body.',
+      }),
+    );
+  }
+
+  if (typeof jsonBody.url !== 'string') {
+    throw new Error(
+      JSON.stringify({
+        ...badRequest,
+        body: 'Property "url" must be a string.',
+      }),
+    );
+  }
+
+  if (urlRegex.test(jsonBody.url) === false) {
+    throw new Error(
+      JSON.stringify({
+        ...badRequest,
+        body: 'Property "url" must be a valid URL.',
+      }),
+    );
+  }
+
+  return jsonBody;
+}
+
+/**
+ * Handle Lambda Fn request to cURL the target URL.
+ *
+ * @param event Lambda Function event (via Lambda Function URL)
+ * @returns cURL result of the target URL
+ */
+export const handler = async function handleRequest(
+  event: APIGatewayEvent,
+): Promise<APIGatewayProxyResultV2> {
+  try {
+    const jsonBody = parseRequestBody(event.body);
+    return call(jsonBody.url);
+  } catch (error) {
+    const errorResult = JSON.parse((error as Error).message);
+    return errorResult;
   }
 };
