@@ -1,1 +1,1 @@
-docker run --interactive --tty --publish 9000:8080 hello-world:latest
+docker run --interactive --tty --publish 9000:8080 --rm hello-world:latest

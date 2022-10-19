@@ -8,9 +8,13 @@ package the app.
 
 ## Debug
 
-Run `sh shell-scripts/build-image.sh` to build the Docker image.
+Build and run the Docker image:
 
-Run `sh shell-scripts/run-container.sh` to start a container using the image.
+```console
+cd shell-scripts
+sh build-image.sh
+sh run-container.sh
+```
 
-In a separate terminal, run `sh shell-scripts/curl-endpoint.sh` to hit the Lambda
+In a separate terminal, run `sh curl-endpoint.sh` to hit the Lambda
 endpoint.
