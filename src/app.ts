@@ -46,6 +46,8 @@ function call(url: string) {
  * @returns Parsed request body
  */
 function parseRequestBody(body: string | null): AppRequestBody {
+  console.log('Validating request.');
+
   const badRequest = {
     statusCode: 400,
     headers: {
