@@ -1,1 +1,1 @@
-docker build -t hello-world:latest ../ --progress=tty
+docker build -t aws-lambda-curl-url:latest ../ --progress=tty
