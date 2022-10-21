@@ -1,3 +1,8 @@
-curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
+read -p "Lambda function URL: " LAMBDA_FUNCTION_URL
+read -p "JSON payload: [{\"url\": \"https://google.com\"}]" JSON_PAYLOAD
+
+JSON_PAYLOAD=${JSON_PAYLOAD:-{\"url\": \"https://google.com\"}}
+
+curl -XPOST "${LAMBDA_FUNCTION_URL}" \
   -H 'Content-Type: application/json' \
-  -d "{\"version\":\"2.0\",\"routeKey\":\"$default\",\"rawPath\":\"/\",\"rawQueryString\":\"\",\"headers\":{\"content-length\":\"29\",\"x-amzn-tls-cipher-suite\":\"ECDHE-RSA-AES128-GCM-SHA256\",\"x-amzn-tls-version\":\"TLSv1.2\",\"x-amzn-trace-id\":\"Root=1-634ec6bd-60f995ea5b5d98c37850c863\",\"x-forwarded-proto\":\"https\",\"host\":\"tof2cppdcu7uxqm7pthy5un4qy0aeclw.lambda-url.us-east-1.on.aws\",\"x-forwarded-port\":\"443\",\"content-type\":\"text/plain\",\"x-forwarded-for\":\"38.34.110.70\",\"accept\":\"*/*\",\"user-agent\":\"curl/7.79.1\"},\"requestContext\":{\"accountId\":\"anonymous\",\"apiId\":\"tof2cppdcu7uxqm7pthy5un4qy0aeclw\",\"domainName\":\"tof2cppdcu7uxqm7pthy5un4qy0aeclw.lambda-url.us-east-1.on.aws\",\"domainPrefix\":\"tof2cppdcu7uxqm7pthy5un4qy0aeclw\",\"http\":{\"method\":\"POST\",\"path\":\"/\",\"protocol\":\"HTTP/1.1\",\"sourceIp\":\"38.34.110.70\",\"userAgent\":\"curl/7.79.1\"},\"requestId\":\"27ffce5e-902c-4b06-8dea-7c905781f314\",\"routeKey\":\"$default\",\"stage\":\"$default\",\"time\":\"18/Oct/2022:15:31:09+0000\",\"timeEpoch\":1666107069494},\"body\":\"{\\\"url\\\":\\\"https://google.com\\\"}\",\"isBase64Encoded\":false}"
+  -d "${JSON_PAYLOAD}"
