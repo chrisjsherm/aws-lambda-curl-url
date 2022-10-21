@@ -64,7 +64,18 @@ function parseRequestBody(body: string | null): AppRequestBody {
     );
   }
 
-  const jsonBody = JSON.parse(body) as AppRequestBody;
+  let jsonBody;
+  try {
+    jsonBody = JSON.parse(body) as AppRequestBody;
+  } catch (err) {
+    console.log(body);
+    throw new Error(
+      JSON.stringify({
+        ...badRequest,
+        body: 'Request body is malformed. Error parsing JSON',
+      }),
+    );
+  }
 
   if (jsonBody.url === undefined) {
     throw new Error(
